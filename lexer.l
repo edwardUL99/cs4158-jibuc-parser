@@ -9,22 +9,22 @@
 %%
 [\t ]+ { /* ignore */ }
 
-BEGINNING { printf("%s: Marks the beginning of the program", yytext); }
+BEGINNING { printf("%s: Marks the beginning of the program\n", yytext); }
 BODY { printf("%s: Marks the body of the program\n", yytext); }
+END { printf("%s: Marks the end of the program\n", yytext); }
 MOVE |
 ADD { printf("%s: Marks an assignment statement\n", yytext); }
+TO { printf("%s: Marks the TO token of the assignment statement\n", yytext); }
 INPUT { printf("%s: Marks an input statement\n", yytext); }
 PRINT { printf("%s: Marks an output statement\n", yytext); } 
 ; { printf("%s: Marks a separator\n", yytext);}
-TO { printf("%s: Marks the TO token of the assignment statement\n", yytext); }
-END { printf("%s: Marks the end of the program\n", yytext); }
 
-X+[\t ]{0,1}[A-WY-Z]{1}[A-Z0-9\-]* { printf("%s: Marks a declaration\n", yytext); }
-[A-Z][A-Z0-9_\-]* { printf("%s: Marks an identifier\n", yytext); }
+X+ { printf("%s: Marks an identifier declaration of size %ld\n", yytext, strlen(yytext)); }
+[A-Z][A-Z0-9\-]* { printf("%s: Marks an identifier\n", yytext); }
 [0-9]+ { printf("%s: Marks an integer\n", yytext); }
-\".*\" { printf("%s: Marks a literal string\n", yytext); }
+\"[^;"\r\n]+\" { printf("%s: Marks a literal string\n", yytext); }
 \r\n |
-\n { printf("%s: Marks a new line\n", yytext); }
+\n { printf(": Marks a new line\n"); }
 . { printf("%s: Unknown value\n", yytext); }
 %%
 
