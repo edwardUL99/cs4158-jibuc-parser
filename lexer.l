@@ -19,15 +19,15 @@ PRINT { printf("%s: Marks an output statement\n", yytext); }
 ; { printf("%s: Marks a separator\n", yytext);}
 TO { printf("%s: Marks the TO token of the assignment statement\n", yytext); }
 
-X+ { printf("%s: Marks an identifier size declaration\n", yytext); }
+X+ { printf("%s: Marks an identifier declaration of size %ld\n", yytext, strlen(yytext)); }
 [A-Z][A-Z0-9\-]* { printf("%s: Marks an identifier\n", yytext); }
 [0-9]+ { printf("%s: Marks an integer\n", yytext); }
-\"[^;.]+\" { printf("%s: Marks a literal string\n", yytext); }
+\"[^;"\r\n.]+\" { printf("%s: Marks a literal string\n", yytext); }
 (\r\n)\. |
 \n\. |
 \. { printf("%s: Marks end of line\n", yytext); }
 \n |
-\r\n { printf(": Marks new line\n", yytext); }
+\r\n { printf(": Marks new line\n"); }
 . { printf("%s: Unknown value\n", yytext); }
 %%
 
