@@ -14,10 +14,10 @@ BODY { printf("%s: Marks the body of the program\n", yytext); }
 END { printf("%s: Marks the end of the program\n", yytext); }
 MOVE |
 ADD { printf("%s: Marks an assignment statement\n", yytext); }
+TO { printf("%s: Marks the TO token of the assignment statement\n", yytext); }
 INPUT { printf("%s: Marks an input statement\n", yytext); }
 PRINT { printf("%s: Marks an output statement\n", yytext); } 
 ; { printf("%s: Marks a separator\n", yytext);}
-TO { printf("%s: Marks the TO token of the assignment statement\n", yytext); }
 
 X+ { printf("%s: Marks an identifier declaration of size %ld\n", yytext, strlen(yytext)); }
 [A-Z][A-Z0-9\-]* { printf("%s: Marks an identifier\n", yytext); }
