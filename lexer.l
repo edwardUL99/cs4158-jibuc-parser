@@ -6,28 +6,49 @@
 
 %option caseless
 
+START (BEGINING|BEGINNING)
+ASSIGNMENT (MOVE|ADD)
+DECLARATION X+
+/* 
+An identifier must start with at least one letter and can be followed by any combination of letters, numbers and -. 
+If it is only 1 letter and the letter is X, it is considered a consecutive X and is therefore a declaration, not identifier
+*/
+IDENTIFIER [A-Z][A-Z0-9\-]*
+/*
+An integer can be 0-9 and have multiple characters in it
+*/
+INTEGER [0-9]+[0-9]*
+/*
+A literal string starts and ends with "". If the string contains " or \r\n, it is an invalid string. You can have an empty string as well
+*/
+STRING \"[^"\r\n]*\"
+/*
+Lines/statements end with the . character (End of Line)
+*/
+EOL (\.)
+/*
+A separator can separate multiple arguments in PRINT, INPUT
+*/
+SEPARATOR ;
+
 %%
 [\t \n\r]+ { /* ignore */ }
 
-BEGINNING |
-BEGINING { printf("%s: Marks the beginning of the program\n", yytext); }
+{START} { printf("%s: Marks the beginning of the program\n", yytext); }
 BODY { printf("%s: Marks the body of the program\n", yytext); }
 END { printf("%s: Marks the end of the program\n", yytext); }
-MOVE |
-ADD { printf("%s: Marks an assignment statement\n", yytext); }
+{ASSIGNMENT} { printf("%s: Marks an assignment statement\n", yytext); }
 TO { printf("%s: Marks the TO token of the assignment statement\n", yytext); }
 INPUT { printf("%s: Marks an input statement\n", yytext); }
 PRINT { printf("%s: Marks an output statement\n", yytext); } 
-; { printf("%s: Marks a separator\n", yytext);}
+{SEPARATOR} { printf("%s: Marks a separator\n", yytext);}
 
-X+ { printf("%s: Marks an identifier declaration of size %ld\n", yytext, strlen(yytext)); }
-[A-Z][A-Z0-9\-]* { printf("%s: Marks an identifier\n", yytext); }
-[0-9]+ { printf("%s: Marks an integer\n", yytext); }
-\"[^;"\r\n.]+\" { printf("%s: Marks a literal string\n", yytext); }
-(\r\n)\. |
-\n\. |
-\. { printf("%s: Marks end of line\n\n", yytext); }
-. { printf("%s: Unknown value\n", yytext); }
+{DECLARATION} { printf("%s: Marks an identifier declaration of size %ld\n", yytext, strlen(yytext)); }
+{IDENTIFIER} { printf("%s: Marks an identifier\n", yytext); }
+{INTEGER} { printf("%s: Marks an integer\n", yytext); }
+{STRING} { printf("%s: Marks a literal string\n", yytext); }
+{EOL} { printf("%s: Marks end of line\n\n", yytext); }
+. { printf("%s: Invalid Token\n", yytext); }
 %%
 
 int yywrap() {}
