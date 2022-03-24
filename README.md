@@ -31,6 +31,11 @@ PRINT XY-1;" + ";Y;"=";Z.
 END.
 ```
 
+### Notes
+The character `.` denotes an end of line/statement chatacter whereas `;` is used in PRINT or INPUT statements to separate multiple tokens.
+The first key-word BEGINING can also be spelled BEGINNING and it will be accepted by the lexer.
+
+
 The version of flex used (on Ubuntu) is as follows:
 ```
 flex 2.6.4

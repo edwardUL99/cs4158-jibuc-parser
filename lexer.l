@@ -6,8 +6,17 @@
 
 %option caseless
 
+/*
+The start token can be spelled BEGINING or BEGINNING
+*/
 START (BEGINING|BEGINNING)
+/*
+An assignment can take on two values, move or add
+*/
 ASSIGNMENT (MOVE|ADD)
+/*
+A declaration is marked by a size string of 1 or more consecutive Xs (followed by an identifier but this rule matches the size string only)
+*/
 DECLARATION X+
 /* 
 An identifier must start with at least one letter and can be followed by any combination of letters, numbers and -. 
@@ -48,6 +57,7 @@ PRINT { printf("%s: Marks an output statement\n", yytext); }
 {INTEGER} { printf("%s: Marks an integer\n", yytext); }
 {STRING} { printf("%s: Marks a literal string\n", yytext); }
 {EOL} { printf("%s: Marks end of line\n\n", yytext); }
+
 . { printf("%s: Invalid Token\n", yytext); }
 %%
 
