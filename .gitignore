@@ -1,3 +1,6 @@
 *.c
 *.jibuc
+*.o
 lexer
+*.h
+parser

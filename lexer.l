@@ -2,18 +2,11 @@
   /*
    * This is a comment
    */
+  #include "parser.tab.h" 
 %}
 
 %option caseless
 
-/*
-The start token can be spelled BEGINING or BEGINNING
-*/
-START (BEGINING|BEGINNING)
-/*
-An assignment can take on two values, move or add
-*/
-ASSIGNMENT (MOVE|ADD)
 /*
 A declaration is marked by a size string of 1 or more consecutive Xs (followed by an identifier but this rule matches the size string only)
 */
@@ -43,30 +36,22 @@ SEPARATOR ;
 %%
 [\t \n\r]+ { /* ignore */ }
 
-{START} { printf("%s: Marks the beginning of the program\n", yytext); }
-BODY { printf("%s: Marks the body of the program\n", yytext); }
-END { printf("%s: Marks the end of the program\n", yytext); }
-{ASSIGNMENT} { printf("%s: Marks an assignment statement\n", yytext); }
-TO { printf("%s: Marks the TO token of the assignment statement\n", yytext); }
-INPUT { printf("%s: Marks an input statement\n", yytext); }
-PRINT { printf("%s: Marks an output statement\n", yytext); } 
-{SEPARATOR} { printf("%s: Marks a separator\n", yytext);}
+BEGINING { return(BEGINING); }
+BEGINNING { return(BEGINNING); }
+BODY { return(BODY); }
+END { return(END); }
+MOVE { return(MOVE); }
+ADD { return(ADD); }
+TO { return(TO);}
+INPUT { return(INPUT); }
+PRINT { return(PRINT); } 
+{SEPARATOR} { return(SEPARATOR); }
 
-{DECLARATION} { printf("%s: Marks an identifier declaration of size %ld\n", yytext, strlen(yytext)); }
-{IDENTIFIER} { printf("%s: Marks an identifier\n", yytext); }
-{INTEGER} { printf("%s: Marks an integer\n", yytext); }
-{STRING} { printf("%s: Marks a literal string\n", yytext); }
-{EOL} { printf("%s: Marks end of line\n\n", yytext); }
+{DECLARATION} { return(DECLARATION); }
+{IDENTIFIER} { return(IDENTIFIER); }
+{INTEGER} { return(INTEGER); }
+{STRING} { return(STRING); }
+{EOL} { return(EOL); }
 
 . { printf("%s: Invalid Token\n", yytext); }
 %%
-
-int yywrap() {}
-int main(int argc, char **argv) {
-  if (argc > 1) {
-    FILE *fp = fopen(argv[1], "r");
-    yyin = fp;
-  }
-
-  yylex();
-}
