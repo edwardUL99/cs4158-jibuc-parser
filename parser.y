@@ -1,9 +1,20 @@
 %{
   #include <stdio.h>
   #include <stdlib.h>
+  #include "variables.h"
+
+  VariableTable* varTable;
 %}
 
 %define parse.error verbose
+
+/*
+Define the union representing data types
+*/
+%union {
+  int intval;
+  char *stringval;
+}
 
 /*
 Define the tokens that the lexer can return
@@ -33,7 +44,7 @@ program: BEGINING EOL declarations
 
 declarations: declaration declarations
 declarations: body
-declaration: DECLARATION IDENTIFIER EOL
+declaration: DECLARATION IDENTIFIER EOL { putvar(varTable, yylval.stringval, 0); }
 
 body: BODY EOL statements
 
@@ -69,6 +80,8 @@ end: END
 extern FILE *yyin;
 
 int main(int argc, char **argv) {
+  varTable = createTable();
+
   if (argc > 1) {
     char *filename = argv[1];
     yyin = fopen(filename, "r");
@@ -76,9 +89,12 @@ int main(int argc, char **argv) {
 
   do yyparse();
     while(!feof(yyin));
+
+  destroy(varTable);
 }
 
 void yyerror(const char *s) {
   fprintf(stderr, "%s\n", s);
+  destroy(varTable);
   exit(-1);
 }
