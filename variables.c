@@ -3,7 +3,6 @@
  */
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include "variables.h"
 
 #ifdef _WINDOWS
@@ -54,23 +53,22 @@ Variable* getvar(VariableTable *table, char *name) {
   for (int i = 0; i < table->length; i++) {
     Variable* current = table->variables[i];
 
-    if (strcasecmp(current->name, name) == 0) {
-      return current;
-    }
+    if (strcasecmp(current->name, name) == 0) return current;
   }
 
   return NULL;
 }
 
-Variable* createVariable(char *name, int value) {
+Variable* createVariable(char *name, int size) {
   Variable* var = (Variable*)malloc(sizeof(Variable));
   var->name = name;
-  var->value = value;
+  var->value = 0;
+  var->size = size;
 
   return var;
 }
 
-Variable* putvar(VariableTable *table, char *name, int value) {
+Variable* putvar(VariableTable *table, char *name, int size) {
   int length = table->length;
   int capacity = table->capacity;
 
@@ -79,7 +77,7 @@ Variable* putvar(VariableTable *table, char *name, int value) {
     table->capacity = capacity + 10;
   }
 
-  Variable *variable = createVariable(name, value);
+  Variable *variable = createVariable(name, size);
   table->variables[length] = variable;
   table->length = length + 1;
 
@@ -89,15 +87,12 @@ Variable* putvar(VariableTable *table, char *name, int value) {
 void setvar(VariableTable *table, char *name, int value) {
   Variable* var = getvar(table, name);
 
-  if (var) {
-    var->value = value;
-  }
+  if (var) var->value = value;
 }
 
 void destroy(VariableTable *table) {
-  for (int i = 0; i < table->length; i++) {
+  for (int i = 0; i < table->length; i++)
     free(table->variables[i]);
-  }
 
   free(table->variables);
   free(table);

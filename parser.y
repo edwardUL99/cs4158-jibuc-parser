@@ -12,8 +12,9 @@
 Define the union representing data types
 */
 %union {
-  int intval;
-  char *stringval;
+  int number;
+  char *ident;
+  int decl;
 }
 
 /*
@@ -33,7 +34,7 @@ Operator tokens
 /*
 Variable tokens
 */
-%token DECLARATION IDENTIFIER STRING INTEGER
+%token <decl> DECLARATION <ident> IDENTIFIER STRING <number> INTEGER
 
 /*
 Define the grammar rules
@@ -44,7 +45,7 @@ program: BEGINING EOL declarations
 
 declarations: declaration declarations
 declarations: body
-declaration: DECLARATION IDENTIFIER EOL { putvar(varTable, yylval.stringval, 0); }
+declaration: DECLARATION IDENTIFIER EOL { putvar(varTable, $2, $1); }
 
 body: BODY EOL statements
 

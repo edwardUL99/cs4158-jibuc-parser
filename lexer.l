@@ -3,6 +3,7 @@
    * This is a comment
    */
   #include "parser.tab.h" 
+  #include <string.h>
 %}
 
 %option caseless
@@ -48,15 +49,15 @@ PRINT { return(PRINT); }
 {SEPARATOR} { return(SEPARATOR); }
 
 {DECLARATION} { 
-    yylval.stringval = strdup(yytext);
-    return(DECLARATION); 
-  }
+  yylval.decl = strlen(yytext);
+  return(DECLARATION); 
+}
 {IDENTIFIER} { 
-  yylval.stringval = strdup(yytext);
+  yylval.ident = strdup(yytext);
   return(IDENTIFIER); 
 }
 {INTEGER} {
-  yylval.intval = atoi(yytext);
+  yylval.number = atoi(yytext);
   return(INTEGER); 
 }
 {STRING} { return(STRING); }
