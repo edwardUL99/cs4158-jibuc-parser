@@ -2,7 +2,8 @@
   /*
    * This is a comment
    */
-  #include "parser.tab.h" 
+  #include "parser.tab.h"
+  #include "variables.h"
   #include <string.h>
 %}
 
@@ -53,7 +54,7 @@ PRINT { return(PRINT); }
   return(DECLARATION); 
 }
 {IDENTIFIER} { 
-  yylval.ident = strdup(yytext);
+  yylval.ident = createident(yytext);
   return(IDENTIFIER); 
 }
 {INTEGER} {

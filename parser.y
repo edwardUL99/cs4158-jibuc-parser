@@ -143,6 +143,7 @@ extern FILE *yyin;
 
 void cleanExit(int status) {
   destroy(varTable);
+  destroyidents();
   exit(status);
 }
 
@@ -198,7 +199,6 @@ void storeVar(char *name, int declarationSize) {
 
   if (variable) {
     vardeferr(variable);
-    free(name);
     cleanExit(1);
   } else {
     putvar(varTable, name, declarationSize);
@@ -215,21 +215,15 @@ void doVariableAssignment(char *left, char *right) {
 
   if (!leftVar) {
     varndeferr(left);
-    free(left);
-    free(right);
     cleanExit(1);
   } else {
     Variable *rightVar = getvar(varTable, right);
 
     if (!rightVar) {
       varndeferr(right);
-      free(left);
-      free(right);
       cleanExit(1);
     } else {
       checkVarSize(leftVar, rightVar);
-      free(left);
-      free(right);
     }
   }
 }
@@ -255,19 +249,16 @@ void doIntegerAssignment(int number, char *right) {
 
   if (!rightVar) {
     varndeferr(right);
-    free(right);
     cleanExit(1);
   } else {
     int numSize = getNumSize(number);
     checkNumSize(number, numSize, rightVar);
-    free(right);
   }
 }
 
 void checkVarExists(char *var) {
   if (!getvar(varTable, var)) {
     varndeferr(var);
-    free(var);
     cleanExit(1);
   }
 }

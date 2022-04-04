@@ -10,14 +10,14 @@
 #endif
 
 /**
- * Create a Variable list of size t size and return it
+ * Create a Variable list
  */
 VariableList create_variable_list(int n) {
   return (VariableList)calloc(n, sizeof(Variable*));
 }
 
 /**
- * Extend the given int list
+ * Extend the given list
  */
 VariableList extend_variable_list(VariableList toExtend, int oldSize, int extendBy) {
   int newSize = oldSize + extendBy;
@@ -84,11 +84,68 @@ Variable* putvar(VariableTable *table, char *name, int size) {
 }
 
 void destroy(VariableTable *table) {
-  for (int i = 0; i < table->length; i++) {
-    free(table->variables[i]->name);
+  for (int i = 0; i < table->length; i++)
     free(table->variables[i]);
-  }
 
   free(table->variables);
   free(table);
+}
+
+/**
+ * Create a list of strings
+ */
+char** create_string_list(int n) {
+  return (char**)calloc(n, sizeof(char**));
+}
+
+/**
+ * Extend the given list
+ */
+char** extend_string_list(char** toExtend, int oldSize, int extendBy) {
+  int newSize = oldSize + extendBy;
+  char** reallocated = (char**)realloc(toExtend, newSize * sizeof(char*));
+
+  if (!reallocated) {
+    char** newList = create_string_list(newSize);
+
+    for (int i = 0; i < oldSize; i++)
+      newList[i] = toExtend[i];
+
+    free(toExtend);
+
+    return newList;
+  } else {
+    return reallocated;
+  }
+}
+
+char** identifiers;
+int capacity = 10;
+int length = 0;
+
+char* createident(char *yytext) {
+  if (!identifiers)
+    identifiers = create_string_list(10);
+
+  char* identifier = strdup(yytext);
+
+  if (length >= capacity) {
+    identifiers = extend_string_list(identifiers, capacity, 10);
+    capacity += 10;
+  }
+
+  identifiers[length] = identifier;
+  length++;
+
+  return identifier;
+}
+
+void destroyidents() {
+  if (identifiers) {
+    for (int i = 0; i < length; i++)
+      free(identifiers[i]);
+
+    free(identifiers);
+    identifiers = NULL;
+  }
 }

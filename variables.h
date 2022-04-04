@@ -48,12 +48,27 @@ VariableTable* createTable();
  */
 Variable* getvar(VariableTable *table, char *name);
 /**
- * Put the variable of name and value into the variable table
+ * Put the variable of name and value into the variable table. The name should be created by createident
+ * so that it can be free's by destroyidents. The variable table does not take responsibility in
+ * freeing the names
  */
 Variable* putvar(VariableTable *table, char *name, int size);
 /**
  * Frees the table and all stored variables
  */
 void destroy(VariableTable *table);
+
+/*
+Variable identifier management
+*/
+
+/**
+ * Create an identifier from the yytext string
+ */
+char *createident(char *yytext);
+/**
+ * Clean up all created identifiers
+ */
+void destroyidents();
 
 #endif // VARIABLES_H
