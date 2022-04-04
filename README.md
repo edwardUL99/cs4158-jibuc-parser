@@ -1,19 +1,20 @@
 # CS4158 Flex and Bison Project
-This project is to create a lexer using flex to parse an input file of the Jubic language into tokens which are then parsed
+This project is to create a lexer using flex to parse an input file of the Jibuc language into tokens which are then parsed
 by the Bison parser
 
-## Running the Flexer
-To run the flexer, you can run the following commands
+## Building the Project
+To build the project, run the following command:
 ```
-flex lexer.l
-gcc lex.yy.c -o lexer
-./lexer file.jubic
+./build.sh
 ```
 
-Or shorthand:
-`flex lexer.l && gcc lex.yy.c && ./lexer file.jubic`
+## Running the Project
+To run the parser, you can run the following command:
+```
+./parser language.jibuc
+```
 
-Where, file.jubic contains the language statements, for example:
+Where language.jibuc contains the language statements, for example:
 ```
 BEGINING.
 XXX XY-1.
@@ -39,6 +40,16 @@ The first key-word BEGINING can also be spelled BEGINNING and it will be accepte
 The version of flex used (on Ubuntu) is as follows:
 ```
 flex 2.6.4
+```
+
+The version of bison used (on Ubuntu is):
+```
+bison (GNU Bison) 3.7.6
+Written by Robert Corbett and Richard Stallman.
+
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
 
 Gcc version (again on Ubuntu) is as follows:
