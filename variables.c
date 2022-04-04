@@ -62,7 +62,6 @@ Variable* getvar(VariableTable *table, char *name) {
 Variable* createVariable(char *name, int size) {
   Variable* var = (Variable*)malloc(sizeof(Variable));
   var->name = name;
-  var->value = 0;
   var->size = size;
 
   return var;
@@ -84,15 +83,11 @@ Variable* putvar(VariableTable *table, char *name, int size) {
   return variable;
 }
 
-void setvar(VariableTable *table, char *name, int value) {
-  Variable* var = getvar(table, name);
-
-  if (var) var->value = value;
-}
-
 void destroy(VariableTable *table) {
-  for (int i = 0; i < table->length; i++)
+  for (int i = 0; i < table->length; i++) {
+    free(table->variables[i]->name);
     free(table->variables[i]);
+  }
 
   free(table->variables);
   free(table);

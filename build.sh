@@ -16,6 +16,6 @@ if [ "$arg" == "-c" ] || [ "$arg" == "--clean" ]; then
 else
 	bison -d parser.y
 	flex lexer.l
-	cc -c lex.yy.c parser.tab.c variables.c
+	cc -c -g lex.yy.c parser.tab.c variables.c
 	cc -o parser lex.yy.o parser.tab.o variables.o -ll
 fi
