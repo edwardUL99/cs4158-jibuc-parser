@@ -1,3 +1,7 @@
-*.c
+*.yy.c
+*.tab.c
+*.tab.h
 *.jibuc
+*.o
 lexer
+parser
