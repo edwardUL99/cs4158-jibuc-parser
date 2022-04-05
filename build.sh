@@ -7,12 +7,12 @@ function delete() {
 }
 
 if [ "$arg" == "-c" ] || [ "$arg" == "--clean" ]; then
-	delete *.o
-	delete *.tab.c
-	delete *.yy.c
-	delete *.tab.h
-	delete lexer
-	delete parser
+	delete "*.o"
+	delete "*.tab.c"
+	delete "*.yy.c"
+	delete "*.tab.h"
+	delete "lexer"
+	delete "parser"
 else
 	bison -d parser.y
 	flex lexer.l

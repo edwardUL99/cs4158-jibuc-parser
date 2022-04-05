@@ -7,18 +7,54 @@
   VariableTable* varTable;
 
   /*
-  0 if assigning a number to an identifier, 1 if assigning identifier to an identifier
+  Mask int as a bool for semantic purposes
   */
-  int identAssignment;
+  typedef int bool;
+  
   /*
-  The number being assigned if an integer
+  Constant values for true and false
   */
-  int assignmentNumber;
-  /*
-  The identifier being assigned if an identifier
-  */
-  char *assignmentIdentifier;
+  const bool false = 0;
+  const bool true = 1;
 
+  /*
+  A union of the value being assigned
+  */
+  typedef union AssignmentValue {
+    /*
+    If an integer is being assigned, this holds the integer
+    */
+    int number;
+    /*
+    If an identifier is being assigned, this holds the name of the identifier
+    */
+    char* identifier;
+  } AssignmentValue;
+
+  /*
+  A struct representing an assignment operation
+  */
+  typedef struct Assignment {
+    /*
+    If true, it is an identifier TO identifier assignment, if false integer TO identifier
+    */
+    bool identifier;
+    /*
+    The value of the assignment operation
+    */
+    AssignmentValue value;
+  } Assignment;
+
+  Assignment assignment;
+
+  /*
+  Tells the parser that an integer assignment is taking place
+  */
+  void beginIntegerAssignment(int number);
+  /*
+  Tells the parser that an identifier assignment is taking place
+  */
+  void beginIdentifierAssignment(char *identifier);
   /*
   Stores the variable of name and declaration size, checking if the variable has already been defined. If already defined
   vardefferr is thrown
@@ -88,37 +124,35 @@ Variable tokens
 Define the grammar rules
 */
 %%
-program: BEGINNING EOL declarations
-program: BEGINING EOL declarations
+program: start declarations body end
 
-declarations: declaration declarations
-declarations: body
+start: BEGINNING EOL
+start: BEGINING EOL
+
+declarations: declaration declarations /* You can have more than one declaration */
+declarations: declaration /* This case matches when only one declaration is defined */
 declaration: DECLARATION IDENTIFIER EOL { storeVar($2, $1); }
 
 body: BODY EOL statements
 
-statements: assignments EOL statements
-statements: inputs EOL statements
-statements: outputs EOL statements
-statements: end EOL
+statements: statement statement_end
+statement: assignments
+statement: inputs
+statement: outputs
+statement_end: EOL statements /* a statement after EOL can lead into more statements */
+statement_end: EOL /* or the statements can just end */
 
 assignments: MOVE assignment_body
 assignments: ADD assignment_body
 assignment_body: assignment_var TO IDENTIFIER {
-  if (identAssignment) {
-    doVariableAssignment(assignmentIdentifier, $3);
+  if (assignment.identifier) {
+    doVariableAssignment(assignment.value.identifier, $3);
   } else {
-    doIntegerAssignment(assignmentNumber, $3);
+    doIntegerAssignment(assignment.value.number, $3);
   }
 }
-assignment_var: INTEGER { 
-  identAssignment = 0;
-  assignmentNumber = $1;  
-}
-assignment_var: IDENTIFIER { 
-  identAssignment = 1;
-  assignmentIdentifier = $1;
-}
+assignment_var: INTEGER { beginIntegerAssignment($1); }
+assignment_var: IDENTIFIER { beginIdentifierAssignment($1); }
 
 inputs: INPUT input_body
 input_body: single_input
@@ -136,7 +170,7 @@ output_var: IDENTIFIER { checkVarExists($1); }
 output_var: INTEGER
 output_var: STRING
 
-end: END
+end: END EOL
 %%
 
 extern FILE *yyin;
@@ -192,6 +226,16 @@ void nvarsizediffwarn(int num, int numSize, Variable *var2) {
   char *buffer = (char*)malloc(size);
   sprintf(buffer, fmt, num, numSize, var2->name, var2->size);
   warn(buffer);
+}
+
+void beginIntegerAssignment(int number) {
+  assignment.identifier = false;
+  assignment.value.number = number;
+}
+
+void beginIdentifierAssignment(char *identifier) {
+  assignment.identifier = true;
+  assignment.value.identifier = identifier;
 }
 
 void storeVar(char *name, int declarationSize) {
