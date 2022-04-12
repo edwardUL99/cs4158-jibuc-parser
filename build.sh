@@ -3,19 +3,31 @@
 arg="$1"
 
 function delete() {
-	rm $1 > /dev/null 2>&1
+	rm -r $1 > /dev/null 2>&1
+}
+
+REQUIRED_HEADERS=("variables.h" "jibuc.h")
+
+function copyRequired() {
+	for var in "${REQUIRED_HEADERS[@]}"; do
+		cp "../$var" .
+	done
 }
 
 if [ "$arg" == "-c" ] || [ "$arg" == "--clean" ]; then
-	delete "*.o"
-	delete "*.tab.c"
-	delete "*.yy.c"
-	delete "*.tab.h"
+	delete "out"
 	delete "lexer"
 	delete "parser"
 else
-	bison -d parser.y
-	flex lexer.l
-	cc -c -g lex.yy.c parser.tab.c variables.c
-	cc -o parser lex.yy.o parser.tab.o variables.o -ll
+	if [ ! -d "out" ]; then
+		mkdir "out"
+	fi
+
+	cd out
+	copyRequired
+	
+	bison -d ../parser.y
+	flex ../lexer.l
+	cc -c -g lex.yy.c parser.tab.c ../variables.c ../jibuc.c
+	cc -o ../parser lex.yy.o parser.tab.o variables.o jibuc.o -ll
 fi

@@ -3,5 +3,7 @@
 *.tab.h
 *.jibuc
 *.o
+out
+.vscode
 lexer
 parser

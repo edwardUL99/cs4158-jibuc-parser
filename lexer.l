@@ -1,7 +1,4 @@
 %{
-  /*
-   * This is a comment
-   */
   #include "parser.tab.h"
   #include "variables.h"
   #include <string.h>
@@ -64,5 +61,5 @@ PRINT { return(PRINT); }
 {STRING} { return(STRING); }
 {EOL} { return(EOL); }
 
-. { printf("%s: Invalid Token\n", yytext); }
+. { return *yytext; }
 %%
