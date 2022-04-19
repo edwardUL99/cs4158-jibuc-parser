@@ -26,17 +26,13 @@ void varndeferr(char *name) {
   yyerror_free(buffer);
 }
 
-void warn(char *warning) {
-  fprintf(stderr, "Warning: %s\n", warning);
-  free(warning);
-}
-
 void varsizediffwarn(Variable *var1, Variable *var2) {
   const char *fmt = "Variable %s with size %d assigned to variable %s of size %d";
   size_t size = snprintf(NULL, 0, fmt, var1->name, var1->size, var2->name, var2->size) + 1;
   char *buffer = (char*)malloc(size);
   sprintf(buffer, fmt, var1->name, var1->size, var2->name, var2->size);
-  warn(buffer);
+  yyerror_free(buffer);
+  cleanExit(1);
 }
 
 void nvarsizediffwarn(int num, int numSize, Variable *var2) {
@@ -44,7 +40,8 @@ void nvarsizediffwarn(int num, int numSize, Variable *var2) {
   size_t size = snprintf(NULL, 0, fmt, num, numSize, var2->name, var2->size) + 1;
   char *buffer = (char*)malloc(size);
   sprintf(buffer, fmt, num, numSize, var2->name, var2->size);
-  warn(buffer);
+  yyerror_free(buffer);
+  cleanExit(1);
 }
 
 void beginIntegerAssignment(int number) {
@@ -140,12 +137,16 @@ void cleanExit(int status) {
   exit(status);
 }
 
+void error(const char *s) {
+  fprintf(stderr, "\033[0;31mError:\033[0m %s\n", s);
+}
+
 void yyerror(const char *s) {
-  fprintf(stderr, "%s\n", s);
+  error(s);
   cleanExit(1);
 }
 
 void yyerror_free(char *s) {
-  fprintf(stderr, "%s\n", s);
+  error(s);
   free(s);
 }

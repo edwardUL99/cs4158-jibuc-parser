@@ -100,6 +100,7 @@ int main(int argc, char **argv) {
   do yyparse();
     while(!feof(yyin));
 
+  fprintf(stdout, "\033[0;32mValid language instance\033[0m\n");
   fclose(yyin);
   cleanExit(0);
 }

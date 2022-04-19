@@ -28,6 +28,6 @@ else
 	
 	bison -d ../parser.y
 	flex ../lexer.l
-	cc -c -g lex.yy.c parser.tab.c ../variables.c ../jibuc.c
-	cc -o ../parser lex.yy.o parser.tab.o variables.o jibuc.o -ll
+	gcc -c -g lex.yy.c parser.tab.c ../variables.c ../jibuc.c
+	gcc -o ../parser lex.yy.o parser.tab.o variables.o jibuc.o -ll
 fi

@@ -41,7 +41,7 @@ BODY { return(BODY); }
 END { return(END); }
 MOVE { return(MOVE); }
 ADD { return(ADD); }
-TO { return(TO);}
+TO { return(TO); }
 INPUT { return(INPUT); }
 PRINT { return(PRINT); } 
 {SEPARATOR} { return(SEPARATOR); }
