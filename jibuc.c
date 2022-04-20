@@ -5,9 +5,25 @@
 
 VariableTable* varTable;
 Assignment assignment;
+FILE* file;
 
-void start() {
+FILE* start(char *filename) {
   varTable = createTable();
+
+  if (filename) {  
+    FILE *f = fopen(filename, "r");
+
+    if (!f) {
+      fprintf(stderr, "File %s not found\n", filename);
+      cleanExit(1);
+    } else {
+      file = f;
+
+      return file;
+    }
+  }
+
+  return NULL;
 }
 
 void vardeferr(Variable *variable) {
@@ -105,7 +121,7 @@ int getNumSize(int number) {
   const char *fmt = "%d";
   size_t size = snprintf(NULL, 0, fmt, number) + 1;
   char *buffer = (char*)malloc(size);
-  sprintf(buffer, fmt, number, number);
+  sprintf(buffer, fmt, number);
   int length = strlen(buffer);
   free(buffer);
 
@@ -134,6 +150,10 @@ void checkVarExists(char *var) {
 void cleanExit(int status) {
   destroy(varTable);
   destroyidents();
+
+  if (file) fclose(file);
+  file = NULL;
+
   exit(status);
 }
 
@@ -149,4 +169,31 @@ void yyerror(const char *s) {
 void yyerror_free(char *s) {
   error(s);
   free(s);
+}
+
+void noleadzeros(char *s) {
+  // make sure there are no leading zeros
+  if (s) {
+    int length = strlen(s);
+
+    if (length > 1 && s[0] == '0') {
+      const char *fmt = "Integer %s has leading zero(es)";
+      size_t size = snprintf(NULL, 0, fmt, s) + 1;
+      char *buffer = (char*)malloc(size);
+      sprintf(buffer, fmt, s);
+      yyerror_free(buffer);
+      cleanExit(1);
+    }
+  }
+}
+
+char* identifier(char *s) {
+  return createident(s);
+}
+
+int integer(char *s) {
+  noleadzeros(s);
+  int num = atoi(s);
+
+  return num;
 }

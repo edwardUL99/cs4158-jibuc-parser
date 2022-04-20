@@ -1,6 +1,6 @@
 %{
   #include "parser.tab.h"
-  #include "variables.h"
+  #include "jibuc.h"
   #include <string.h>
 %}
 
@@ -16,13 +16,14 @@ If it is only 1 letter and the letter is X, it is considered a consecutive X and
 */
 IDENTIFIER [A-Z][A-Z0-9\-]*
 /*
-An integer can be 0-9 and have multiple characters in it
+An integer is ether multiple digits with the ffirst digit being 1-9 (no leading zeroes) or a single digit 0-9
 */
-INTEGER [0-9]+[0-9]*
+INTEGER [0-9]+
 /*
 A literal string starts and ends with "". If the string contains " or \r\n, it is an invalid string. You can have an empty string as well
 */
-STRING \"[^"\r\n]*\"
+/* \"[^"\r\n]*\" TODO old definition of string. New definition allows new lines in string etc. decide which to keep" */
+STRING \"[^"]*\"
 /*
 Lines/statements end with the . character (End of Line)
 */
@@ -51,11 +52,12 @@ PRINT { return(PRINT); }
   return(DECLARATION); 
 }
 {IDENTIFIER} { 
-  yylval.ident = createident(yytext);
+  yylval.ident = identifier(yytext);
   return(IDENTIFIER); 
 }
 {INTEGER} {
-  yylval.number = atoi(yytext);
+  yylval.number = integer(yytext);
+
   return(INTEGER); 
 }
 {STRING} { return(STRING); }

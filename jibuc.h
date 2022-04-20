@@ -42,11 +42,15 @@ extern Assignment assignment;
  * The table of variables
  */
 extern VariableTable* varTable;
+/**
+ * The file being read
+ */
+extern FILE* file;
 
 /**
- * Prepares the parser for parsing by defining the variable table
+ * Prepares the parser for parsing by defining the variable table. Give a null file argument to use stdin
  */
-void start();
+FILE* start(char *file);
 /**
  * Tells the parser that an integer assignment is taking place
  */
@@ -104,5 +108,19 @@ void yyerror(const char *s);
  * Like yyerror but frees s and doesn't exit
  */
 void yyerror_free(char *s);
+
+/*
+Lexer functions
+*/
+
+/**
+ * Takes the given string representing the identifier and adds it to the list of managed strings so
+ * that it is deleted when the program exits. Therefore, don't free the return value yourself as long as cleanExit is called
+ */
+char* identifier(char *s);
+/**
+ * Parses a number to an integer while checking that a number represented as the string doesn't start with 0. Exits with an error if it does
+ */
+int integer(char *s);
 
 #endif
