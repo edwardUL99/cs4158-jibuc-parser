@@ -33,7 +33,7 @@ END.
 ```
 
 ### Notes
-The character `.` denotes an end of line/statement chatacter whereas `;` is used in PRINT or INPUT statements to separate multiple tokens.
+The character `.` denotes an end of line/statement character whereas `;` is used in PRINT or INPUT statements to separate multiple tokens.
 The first key-word BEGINING can also be spelled BEGINNING and it will be accepted by the lexer.
 
 

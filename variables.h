@@ -19,10 +19,13 @@ typedef struct Variable {
   int size;
 } Variable;
 
+/*
+Defines a type that holds a "list" (more so an Array) of variable pointers
+*/
 typedef Variable** VariableList;
 
 /**
- * The variable table
+ * This structure holds all the variables identified by the lexer and parser
  */
 typedef struct VariableTable {
   /**
@@ -34,7 +37,7 @@ typedef struct VariableTable {
    */
   int capacity;
   /**
-   * The list of variables
+   * The list of variables contained within the table
    */
   VariableList variables;
 } VariableTable;

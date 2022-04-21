@@ -7,7 +7,8 @@
  */
 
 /**
- * A union of the value being assigned in the current assignment context
+ * A union of the value being assigned. Defines the value of a assignment context identifying either an integer being assigned to an identifier
+ * or an identifier being assigned to another identifier
  */
 typedef union AssignmentValue {
   /**
@@ -21,7 +22,8 @@ typedef union AssignmentValue {
 } AssignmentValue;
 
 /**
- * A struct representing an assignment operation in progress
+ * A struct representing an assignment operation in progress. This defines the context of an assignment in progress.
+ * It identifies if the assignment is IDENTIFIER TO IDENTIFIER or INTEGER TO INTEGER and holds the LHS value of the assignment
  */
 typedef struct Assignment {
   /*
@@ -35,7 +37,7 @@ typedef struct Assignment {
 } Assignment;
 
 /**
- * The current assignment value
+ * The current assignment context
  */
 extern Assignment assignment;
 /**

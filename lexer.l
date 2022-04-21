@@ -22,12 +22,11 @@ INTEGER [0-9]+
 /*
 A literal string starts and ends with "". If the string contains " or \r\n, it is an invalid string. You can have an empty string as well
 */
-/* \"[^"\r\n]*\" TODO old definition of string. New definition allows new lines in string etc. decide which to keep" */
 STRING \"[^"]*\"
 /*
 Lines/statements end with the . character (End of Line)
 */
-EOL (\.)
+EOL \.
 /*
 A separator can separate multiple arguments in PRINT, INPUT
 */

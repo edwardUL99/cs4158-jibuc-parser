@@ -177,7 +177,7 @@ void noleadzeros(char *s) {
     int length = strlen(s);
 
     if (length > 1 && s[0] == '0') {
-      const char *fmt = "Integer %s has leading zero(es)";
+      const char *fmt = "Integer %s has leading zero(es). This is not allowed";
       size_t size = snprintf(NULL, 0, fmt, s) + 1;
       char *buffer = (char*)malloc(size);
       sprintf(buffer, fmt, s);

@@ -1,6 +1,8 @@
 %{
   #include <stdio.h>
   #include "jibuc.h"
+
+  int yylex(); // define a declaration("prototype") here to avoid compiler warnings
 %}
 
 %define parse.error verbose
@@ -37,18 +39,28 @@ Variable tokens
 Define the grammar rules
 */
 %%
-program: start declarations body end
+program: start preamble_statements body end
 
 start: BEGINNING EOL
   | BEGINING EOL
 
+/*
+These statements are statements that come before body. Only existing ones currently are declarations
+*/
+preamble_statements: preamble_statement EOL preamble_statements
+  | /* lambda */ /* possible to have no more declarations after the first one or none at all */
+preamble_statement: declarations
 declarations: declaration declarations /* You can have more than one declaration */
-  | declaration /* This case matches when only one declaration is defined */
-declaration: DECLARATION IDENTIFIER EOL { storeVar($2, $1); }
+  | declaration /* possible to have 1 declaration */
+declaration: DECLARATION IDENTIFIER { storeVar($2, $1); }
 
 body: BODY EOL statements
 
-statements: statement statement_end
+/*
+These mark the main statements between body and end
+*/
+statements: statement EOL statements
+  | /* lambda */ /* possible to have 0 or more statements */
 /* 
   A statement can be a declaration, assignment, input or output. Technically declarations are statements but they come before all the other statements (before the BODY). 
   These statements come after BODY and before END so need to be treated differently 
@@ -56,8 +68,6 @@ statements: statement statement_end
 statement: assignments
   | inputs
   | outputs
-statement_end: EOL statements /* a statement after EOL can lead into more statements */
-  | EOL /* or the statements can just end */
 
 assignments: assignment_operation assignment_body
 assignment_operation: MOVE
