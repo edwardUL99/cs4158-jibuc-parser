@@ -8,6 +8,35 @@ To build the project, run the following command:
 ./build.sh
 ```
 
+The default behaviour for when a variable is redeclared is to throw an error. However, you can define 2 alternative strategies when building the parser. The strategies are outlined below:
+* 0 - Default error thrown when variable is redeclared
+* 1 - Redeclare the variable with the new size provided
+* 2 - Do nothing, i.e. the redeclaration will be ignored, and the first declared variable will be kept
+
+When compiling, add `-DREDECLARE_STRATEGY=0/1/2` to choose the strategy. Leaving out this argument is the same as passing in `0`.
+
+If a variable/integer with a size greater than the variable being assigned to with a `MOVE/ADD VARIABLE/INTEGER TO VARIABLE` statement is encountered, an error is thrown by default. If you wish to just emit a warning, pass in the flag `-DWARN_SIZE_DIFF` to the build command. For example,
+```
+BEGINNING.
+XXXX Y.
+BODY.
+
+ADD 50000 TO Y.
+
+END.
+```
+
+Without the `-DWARN_SIZE_DIFF` flag defined, the following error is thrown:
+```
+Error: Integer 50000 of size 5 assigned to variable Y of size 4
+```
+
+With it defined, the following is output:
+```
+Warning: Integer 50000 of size 5 assigned to variable Y of size 4
+Valid language instance
+```
+
 ## Running the Project
 To run the parser, you can run the following command:
 ```

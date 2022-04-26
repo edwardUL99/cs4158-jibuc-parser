@@ -3,6 +3,50 @@
 #include <string.h>
 #include "jibuc.h"
 
+/**
+ * This function defines a strategy to use for storing new variables.
+ * Example, they may want to be redeclared without throwing an error (0),
+ * redeclare while keeping the original size (1). If not defined,
+ * the default is to throw an error if the same variable is redeclared
+ */
+void storeVarStrategy(char *name, int declarationSize);
+/**
+ * Ths function defines the default strategy to use should no valid strategy be defined
+ */
+void defaultStoreVarStrategy(char *name, int declarationSize);
+
+const char* WARNING = "\033[0;33mWarning:\033[0m";
+
+#ifdef REDECLARE_STRATEGY
+#if REDECLARE_STRATEGY == 1
+#define REDCL_DECLARED
+void storeVarStrategy(char *name, int declarationSize) {
+  Variable *variable = getvar(varTable, name);
+
+  if (variable) fprintf(stdout, "%s %s previously declared with size %d. Redeclaring with size %d\n", WARNING, name, variable->size, declarationSize);
+
+  putvar(varTable, name, declarationSize);
+}
+#elif REDECLARE_STRATEGY == 2
+#define REDCL_DECLARED
+void storeVarStrategy(char *name, int declarationSize) {
+  Variable *variable = getvar(varTable, name);
+
+  if (variable) {
+    fprintf(stdout, "%s %s attempted to be redeclared with size %d. The first declared size %d will be used\n", WARNING, name, declarationSize, variable->size);
+  } else {
+    putvar(varTable, name, declarationSize);
+  }
+}
+#endif
+#endif
+
+#ifndef REDCL_DECLARED
+void storeVarStrategy(char *name, int declarationSize) {
+  defaultStoreVarStrategy(name, declarationSize); // the redeclare strategy wasn't provided, so default to the default (no redeclaration allowed)
+}
+#endif
+
 VariableTable* varTable;
 Assignment assignment;
 FILE* file;
@@ -42,13 +86,22 @@ void varndeferr(char *name) {
   yyerror_free(buffer);
 }
 
+void printVarSizeError(char *error) {
+  #ifndef WARN_SIZE_DIFF
+  yyerror_free(error);
+  cleanExit(1);
+  #else
+  fprintf(stdout, "%s %s\n", WARNING, error);
+  free(error);
+  #endif 
+}
+
 void varsizediffwarn(Variable *var1, Variable *var2) {
   const char *fmt = "Variable %s with size %d assigned to variable %s of size %d";
   size_t size = snprintf(NULL, 0, fmt, var1->name, var1->size, var2->name, var2->size) + 1;
   char *buffer = (char*)malloc(size);
   sprintf(buffer, fmt, var1->name, var1->size, var2->name, var2->size);
-  yyerror_free(buffer);
-  cleanExit(1);
+  printVarSizeError(buffer);
 }
 
 void nvarsizediffwarn(int num, int numSize, Variable *var2) {
@@ -56,8 +109,7 @@ void nvarsizediffwarn(int num, int numSize, Variable *var2) {
   size_t size = snprintf(NULL, 0, fmt, num, numSize, var2->name, var2->size) + 1;
   char *buffer = (char*)malloc(size);
   sprintf(buffer, fmt, num, numSize, var2->name, var2->size);
-  yyerror_free(buffer);
-  cleanExit(1);
+  printVarSizeError(buffer);
 }
 
 void beginIntegerAssignment(int number) {
@@ -78,7 +130,7 @@ void doAssignment(char *identifier) {
   }
 }
 
-void storeVar(char *name, int declarationSize) {
+void defaultStoreVarStrategy(char *name, int declarationSize) {
   Variable *variable = getvar(varTable, name);
 
   if (variable) {
@@ -87,6 +139,10 @@ void storeVar(char *name, int declarationSize) {
   } else {
     putvar(varTable, name, declarationSize);
   }
+}
+
+void storeVar(char *name, int declarationSize) {
+  storeVarStrategy(name, declarationSize);
 }
 
 void checkVarSize(Variable *left, Variable *right) {

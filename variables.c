@@ -67,20 +67,38 @@ Variable* createVariable(char *name, int size) {
   return var;
 }
 
-Variable* putvar(VariableTable *table, char *name, int size) {
+Variable* replace_or_insert(VariableTable *table, char *name, int size) {
+  Variable *found = NULL;
   int length = table->length;
   int capacity = table->capacity;
 
-  if (length >= capacity) {
-    table->variables = extend_variable_list(table->variables, capacity, 10);
-    table->capacity = capacity + 10;
+  for (int i = 0; i < length; i++) {
+    if (strcasecmp(name, table->variables[i]->name) == 0) {
+      free(table->variables[i]);
+      table->variables[i] = createVariable(name, size);
+      found = table->variables[i];
+      break;
+    }
   }
 
-  Variable *variable = createVariable(name, size);
-  table->variables[length] = variable;
-  table->length = length + 1;
+  if (!found) {
+    if (length >= capacity) {
+      table->variables = extend_variable_list(table->variables, capacity, 10);
+      table->capacity = capacity + 10;
+    }
 
-  return variable;
+    Variable *variable = createVariable(name, size);
+    table->variables[length] = variable;
+    table->length = length + 1;
+
+    found = variable;
+  }
+
+  return found;
+}
+
+Variable* putvar(VariableTable *table, char *name, int size) {
+  return replace_or_insert(table, name, size);
 }
 
 void destroy(VariableTable *table) {
