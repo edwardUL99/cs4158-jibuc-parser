@@ -31,7 +31,7 @@ void storeVarStrategy(char *name, int declarationSize);
 void defaultStoreVarStrategy(char *name, int declarationSize);
 
 #ifdef REDECLARE_STRATEGY
-#if REDECLARE_STRATEGY == REDECLARE
+#if REDECLARE_STRATEGY == 1
 #define REDCL_DECLARED
 void storeVarStrategy(char *name, int declarationSize) {
   Variable *variable = getvar(varTable, name);
@@ -40,7 +40,7 @@ void storeVarStrategy(char *name, int declarationSize) {
 
   putvar(varTable, name, declarationSize);
 }
-#elif REDECLARE_STRATEGY == IGNORE_REDECLARE
+#elif REDECLARE_STRATEGY == 2
 #define REDCL_DECLARED
 void storeVarStrategy(char *name, int declarationSize) {
   Variable *variable = getvar(varTable, name);

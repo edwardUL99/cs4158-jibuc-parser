@@ -1,6 +1,7 @@
 /**
  * This file holds the implementation of variables.h
  */
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "variables.h"
@@ -10,50 +11,31 @@
 #endif
 
 /**
- * Create a Variable list
+ * Create a Variable list. Implemented as a linked list for efficiency
  */
-VariableList create_variable_list(int n) {
-  return (VariableList)calloc(n, sizeof(Variable*));
-}
+VariableList* create_variable_list() {
+  VariableList* varList = (VariableList*)malloc(sizeof(VariableList*));
+  varList->head = NULL;
 
-/**
- * Extend the given list
- */
-VariableList extend_variable_list(VariableList toExtend, int oldSize, int extendBy) {
-  int newSize = oldSize + extendBy;
-  VariableList reallocated = (VariableList)realloc(toExtend, newSize * sizeof(Variable*));
-
-  if (!reallocated) {
-    VariableList newList = create_variable_list(newSize);
-
-    for (int i = 0; i < oldSize; i++)
-      newList[i] = toExtend[i];
-
-    free(toExtend);
-
-    return newList;
-  } else {
-    return reallocated;
-  }
+  return varList;
 }
 
 VariableTable* createTable() {
-  const int initialSize = 10;
-  const VariableList varList = create_variable_list(initialSize);
+  VariableList* varList = create_variable_list();
 
   VariableTable* table = (VariableTable*)malloc(sizeof(VariableTable));
-  table->length = 0;
-  table->capacity = initialSize;
   table->variables = varList;
 
   return table;
 }
 
 Variable* getvar(VariableTable *table, char *name) {
-  for (int i = 0; i < table->length; i++) {
-    Variable* current = table->variables[i];
+  Variable* current = table->variables->head;
 
+  while (current != NULL) {
     if (strcasecmp(current->name, name) == 0) return current;
+
+    current = current->next;
   }
 
   return NULL;
@@ -63,47 +45,73 @@ Variable* createVariable(char *name, int size) {
   Variable* var = (Variable*)malloc(sizeof(Variable));
   var->name = name;
   var->size = size;
+  var->next = NULL;
 
   return var;
 }
 
-Variable* replace_or_insert(VariableTable *table, char *name, int size) {
-  Variable *found = NULL;
-  int length = table->length;
-  int capacity = table->capacity;
+void replaceVariable(VariableList* variables, Variable* newVariable, Variable* current, Variable* previous) {
+  newVariable->next = current->next;
 
-  for (int i = 0; i < length; i++) {
-    if (strcasecmp(name, table->variables[i]->name) == 0) {
-      free(table->variables[i]);
-      table->variables[i] = createVariable(name, size);
-      found = table->variables[i];
-      break;
+  if (previous == NULL) {
+    free(variables->head);
+    variables->head = newVariable;
+  } else {
+    free(previous->next);
+    previous->next = newVariable;
+  }
+}
+
+Variable* replaceInsert(VariableTable *table, char *name, int size) {
+  if (table->variables->head == NULL) {
+    table->variables->head = createVariable(name, size);
+
+    return table->variables->head;
+  } else {
+    Variable* current = table->variables->head;
+    Variable* previous = NULL;
+
+    while (current != NULL) {
+      const int matched = strcasecmp(name, current->name) == 0;
+
+      Variable* newVariable = createVariable(name, size);
+      
+      if (matched) {
+        replaceVariable(table->variables, newVariable, current, previous);
+
+        return newVariable;
+      } else {
+        if (current->next == NULL) {
+          current->next = newVariable;
+          
+          return newVariable;
+        } else {
+          free(newVariable);
+        }
+      }
+
+      previous = current;
+      current = current->next;
     }
   }
 
-  if (!found) {
-    if (length >= capacity) {
-      table->variables = extend_variable_list(table->variables, capacity, 10);
-      table->capacity = capacity + 10;
-    }
-
-    Variable *variable = createVariable(name, size);
-    table->variables[length] = variable;
-    table->length = length + 1;
-
-    found = variable;
-  }
-
-  return found;
+  return NULL;
 }
 
 Variable* putvar(VariableTable *table, char *name, int size) {
-  return replace_or_insert(table, name, size);
+  return replaceInsert(table, name, size);
 }
 
 void destroy(VariableTable *table) {
-  for (int i = 0; i < table->length; i++)
-    free(table->variables[i]);
+  if (table->variables->head) {
+    Variable* current = table->variables->head;
+
+    while (current != NULL) {
+      Variable* next = current->next;
+      free(current);
+      current = next;
+    }
+  }
 
   free(table->variables);
   free(table);
