@@ -37,6 +37,15 @@ Warning: Integer 50000 of size 5 assigned to variable Y of size 4
 Valid language instance
 ```
 
+If an integer is encountered with leading zeros, the default is to throw an error. If they should be allowed, define the flag `-DLEAD_ZEROS` which will allow leading zeros and just strip them off. Take the statement `MOVE 0005 TO XYZ.`.
+
+With the `-DLEAD_ZEROS` emitted, you get the following error:
+```
+Error: Integer 0005 has leading zero(s). This is not allowed
+````
+
+With the flag provided, the 000 is stripped off and parsing proceeds.
+
 ## Running the Project
 To run the parser, you can run the following command:
 ```

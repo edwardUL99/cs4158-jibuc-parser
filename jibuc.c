@@ -3,6 +3,21 @@
 #include <string.h>
 #include "jibuc.h"
 
+const char* WARNING = "\033[0;33mWarning:\033[0m";
+
+/**
+ * The following defines functions and other configuration items based off compiler -D macros
+ */
+
+/**
+ * A constant to identify if a variable is redeclared, and to tell the parser to redefine it
+ */
+const int REDECLARE = 1;
+/**
+ * A constant to identify that if a variable is redeclared, ignore the new declaration
+ */
+const int IGNORE_REDECLARE = 2;
+
 /**
  * This function defines a strategy to use for storing new variables.
  * Example, they may want to be redeclared without throwing an error (0),
@@ -15,10 +30,8 @@ void storeVarStrategy(char *name, int declarationSize);
  */
 void defaultStoreVarStrategy(char *name, int declarationSize);
 
-const char* WARNING = "\033[0;33mWarning:\033[0m";
-
 #ifdef REDECLARE_STRATEGY
-#if REDECLARE_STRATEGY == 1
+#if REDECLARE_STRATEGY == REDECLARE
 #define REDCL_DECLARED
 void storeVarStrategy(char *name, int declarationSize) {
   Variable *variable = getvar(varTable, name);
@@ -27,7 +40,7 @@ void storeVarStrategy(char *name, int declarationSize) {
 
   putvar(varTable, name, declarationSize);
 }
-#elif REDECLARE_STRATEGY == 2
+#elif REDECLARE_STRATEGY == IGNORE_REDECLARE
 #define REDCL_DECLARED
 void storeVarStrategy(char *name, int declarationSize) {
   Variable *variable = getvar(varTable, name);
@@ -41,11 +54,62 @@ void storeVarStrategy(char *name, int declarationSize) {
 #endif
 #endif
 
+// the redeclaration strategy was not declared, so declare it to call the default
 #ifndef REDCL_DECLARED
 void storeVarStrategy(char *name, int declarationSize) {
   defaultStoreVarStrategy(name, declarationSize); // the redeclare strategy wasn't provided, so default to the default (no redeclaration allowed)
 }
 #endif
+
+// Define a function that prints an error when variable sizes differ or warning if configured
+#ifndef WARN_SIZE_DIFF
+void printVarSizeError(char *error) {
+  yyerror_free(error);
+  cleanExit(1);
+  #ifndef WARN_SIZE_DIFF
+  #else
+  fprintf(stdout, "%s %s\n", WARNING, error);
+  free(error);
+  #endif 
+}
+#else
+void printVarSizeError(char *error) {
+  fprintf(stdout, "%s %s\n", WARNING, error);
+  free(error);
+}
+#endif
+
+#ifdef LEAD_ZEROS
+int parseInteger(char *s) {
+  return atoi(s);
+}
+#else
+void noleadzeros(char *s) {
+  // make sure there are no leading zeros
+  if (s) {
+    int length = strlen(s);
+
+    if (length > 1 && s[0] == '0') {
+      const char *fmt = "Integer %s has leading zero(es). This is not allowed";
+      size_t size = snprintf(NULL, 0, fmt, s) + 1;
+      char *buffer = (char*)malloc(size);
+      sprintf(buffer, fmt, s);
+      yyerror_free(buffer);
+      cleanExit(1);
+    }
+  }
+}
+
+int parseInteger(char *s) {
+  noleadzeros(s);
+  
+  return atoi(s);
+}
+#endif
+
+/**
+ * Implementation of parser Jibuc functions
+ */
 
 VariableTable* varTable;
 Assignment assignment;
@@ -84,16 +148,6 @@ void varndeferr(char *name) {
   char *buffer = (char*)malloc(size);
   sprintf(buffer, fmt, name);
   yyerror_free(buffer);
-}
-
-void printVarSizeError(char *error) {
-  #ifndef WARN_SIZE_DIFF
-  yyerror_free(error);
-  cleanExit(1);
-  #else
-  fprintf(stdout, "%s %s\n", WARNING, error);
-  free(error);
-  #endif 
 }
 
 void varsizediffwarn(Variable *var1, Variable *var2) {
@@ -227,29 +281,10 @@ void yyerror_free(char *s) {
   free(s);
 }
 
-void noleadzeros(char *s) {
-  // make sure there are no leading zeros
-  if (s) {
-    int length = strlen(s);
-
-    if (length > 1 && s[0] == '0') {
-      const char *fmt = "Integer %s has leading zero(es). This is not allowed";
-      size_t size = snprintf(NULL, 0, fmt, s) + 1;
-      char *buffer = (char*)malloc(size);
-      sprintf(buffer, fmt, s);
-      yyerror_free(buffer);
-      cleanExit(1);
-    }
-  }
-}
-
 char* identifier(char *s) {
   return createident(s);
 }
 
 int integer(char *s) {
-  noleadzeros(s);
-  int num = atoi(s);
-
-  return num;
+  return parseInteger(s);
 }

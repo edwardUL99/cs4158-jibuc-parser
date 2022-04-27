@@ -8,7 +8,7 @@
 %define parse.error verbose
 
 /*
-Define the union representing data types
+Define the union representing data types. Number holds a literal integer, ident holds the name of an identifier and decl holds the size of a declaration
 */
 %union {
   int number;
@@ -39,21 +39,31 @@ Variable tokens
 Define the grammar rules
 */
 %%
-program: start preamble_statements body end
+/*
+  A program consists of the program start, statements that ready the program (preamble), for
+  example, variable declarations, then the body which consists of statements, and finally the end
+*/
+program: start preamble body end
 
+/*
+  Can start with BEGINNING or BEGINING.
+*/
 start: BEGINNING EOL
   | BEGINING EOL
 
 /*
-These statements are statements that come before body. Only existing ones currently are declarations
+The preamble contains statements that come before body. Only existing ones currently are declarations
 */
-preamble_statements: preamble_statement EOL preamble_statements
+preamble: preamble_statement EOL preamble
   | /* lambda */ /* possible to have no more declarations after the first one or none at all */
 preamble_statement: declarations
 declarations: declaration declarations /* You can have more than one declaration */
   | declaration /* possible to have 1 declaration */
 declaration: DECLARATION IDENTIFIER { storeVar($2, $1); }
 
+/*
+The body of the program starts with BODY. and then contains 0 or more statements
+*/
 body: BODY EOL statements
 
 /*
@@ -69,6 +79,9 @@ statement: assignments
   | inputs
   | outputs
 
+/*
+  An assignment can be a MOVE or an ADD followed by IDENTIFIER/INTEGER TO IDENTIFIER
+*/
 assignments: assignment_operation assignment_body
 assignment_operation: MOVE
   | ADD
@@ -76,11 +89,17 @@ assignment_body: assignment_var TO IDENTIFIER { doAssignment($3); }
 assignment_var: INTEGER { beginIntegerAssignment($1); }
   | IDENTIFIER { beginIdentifierAssignment($1); }
 
+/*
+  An input consists of INPUT IDENTIFIER. Or it can have multiple identifiers with INPUT IDENTIFIER;IDENTIFIER1;IDENTIFIER2.
+*/
 inputs: INPUT input_body
 input_body: input_var /* You can have a single input variable or an input variable with a separator ; and another input body */
   | input_var SEPARATOR input_body
 input_var: IDENTIFIER { checkVarExists($1); }
 
+/*
+  An output statement consists of PRINT IDENTIFIER/INTEGER/STRING. Or it can have multiple values separated by ;
+*/
 outputs: PRINT output_body
 output_body: output_var /* You can have a single output variable or an output variable with a separator ; and another output body */
   | output_var SEPARATOR output_body
@@ -88,6 +107,9 @@ output_var: IDENTIFIER { checkVarExists($1); }
   | INTEGER
   | STRING
 
+/*
+  The program ends with the end keyword and an end-of-line (.) character
+*/
 end: END EOL
 %%
 
