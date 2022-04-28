@@ -46,6 +46,16 @@ Error: Integer 0005 has leading zero(s). This is not allowed
 
 With the flag provided, the 000 is stripped off and parsing proceeds.
 
+### Manual Build
+If the script does not run for some reason, the following are the commands to run manually to build the project:
+```
+bison -d parser.y
+flex lexer.l
+gcc parser.tab.c variables.c jibuc.c lex.yy.c -o parser -ll
+```
+
+You can also pass the -D arguments into the gcc command as you would have done with the build script
+
 ## Running the Project
 To run the parser, you can run the following command:
 ```
@@ -72,7 +82,7 @@ END.
 
 ### Notes
 The character `.` denotes an end of line/statement character whereas `;` is used in PRINT or INPUT statements to separate multiple tokens.
-The first key-word BEGINING can also be spelled BEGINNING and it will be accepted by the lexer.
+The first key-word BEGINING can also be spelled BEGINNING and it will be accepted by the lexer and parser.
 
 
 The version of flex used (on Ubuntu) is as follows:
